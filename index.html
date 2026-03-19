@@ -13,12 +13,12 @@
         background: linear-gradient(135deg, #b2fefa, #0ed2f7);
         color: #333;
     }
+
+    /* タイトルは非表示にする */
     h1 {
-        font-size: 2.2em;
-        margin-bottom: 10px;
+        display: none;
     }
 
-    /* キャラ表示 */
     #pet {
         font-size: 90px;
         margin: 20px auto;
@@ -30,7 +30,6 @@
         50% { transform: translateY(-12px); }
     }
 
-    /* ステータスボックス */
     .status-box {
         width: 280px;
         margin: 0 auto;
@@ -54,7 +53,6 @@
         transition: width 0.3s;
     }
 
-    /* ボタン */
     button {
         margin: 10px;
         padding: 10px 28px;
@@ -75,7 +73,6 @@
         height: 1.2em;
     }
 
-    /* ミニゲーム画面 */
     #gameArea {
         display: none;
         margin-top: 20px;
@@ -85,12 +82,12 @@
         border-radius: 15px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
-
 </style>
 </head>
 <body>
 
-<h1>たまごっち風 育成ゲーム 完全版</h1>
+<!-- タイトル削除済み -->
+<h1>（非表示）</h1>
 
 <div id="pet">🥚</div>
 
@@ -115,7 +112,6 @@
 
 <div id="message"></div>
 
-<!-- ミニゲーム -->
 <div id="gameArea">
     <div>ミニゲーム：タップしてポイントゲット！</div>
     <button onclick="hit()">タップ！</button>
@@ -124,15 +120,12 @@
 </div>
 
 <script>
-/*--------------------------
-   基本ステータス
----------------------------*/
 let hunger = 100;
 let energy = 100;
 let cleanVal = 100;
 
-let stage = 0;  // 0=たまご 1=幼年期 2=成長期 3=成熟期
-let evolution = 0; // 0=未決定, 1〜3で分岐
+let stage = 0;
+let evolution = 0;
 
 const hungerBar = document.getElementById("hungerBar");
 const energyBar = document.getElementById("energyBar");
@@ -141,42 +134,27 @@ const message   = document.getElementById("message");
 const pet       = document.getElementById("pet");
 const stageText = document.getElementById("stageText");
 
-/*--------------------------
-   ペットの顔（進化後も対応）
----------------------------*/
 function getFace() {
     if (stage === 0) return "🥚";
-
-    // 体調悪いと表情変更
     if (hunger < 30) return "😞";
     if (energy < 30) return "🥱";
     if (cleanVal < 30) return "🤢";
 
-    // 進化3種類
     if (stage === 3) {
-        if (evolution === 1) return "🐲"; // ドラゴン系
-        if (evolution === 2) return "🐱"; // ネコ系
-        if (evolution === 3) return "🦊"; // キツネ系
+        if (evolution === 1) return "🐲";
+        if (evolution === 2) return "🐱";
+        if (evolution === 3) return "🦊";
     }
-
-    // 通常
     return "😊";
 }
 
-/*--------------------------
-    ステータス更新
----------------------------*/
 function updateBars() {
     hungerBar.style.width = hunger + "%";
     energyBar.style.width = energy + "%";
     cleanBar.style.width  = cleanVal + "%";
-
     pet.textContent = getFace();
 }
 
-/*--------------------------
-    成長処理
----------------------------*/
 function checkEvolution() {
     if (stage === 0 && hunger > 50) {
         stage = 1;
@@ -188,19 +166,13 @@ function checkEvolution() {
         pet.textContent = "🐥";
     } else if (stage === 2 && hunger > 70 && energy > 70 && cleanVal > 70) {
         stage = 3;
-
-        // 進化分岐
         if (hunger > energy)      evolution = 1;
         else if (energy > 90)    evolution = 2;
         else                     evolution = 3;
-
         stageText.textContent = "ステージ：成熟期（進化！）";
     }
 }
 
-/*--------------------------
-    アクション
----------------------------*/
 function feed() {
     hunger = Math.min(100, hunger + 20);
     message.textContent = "おいしそう！";
@@ -218,36 +190,26 @@ function cleanPet() {
     updateBars();
 }
 
-/*--------------------------
-    時間経過
----------------------------*/
 setInterval(() => {
     hunger = Math.max(0, hunger - 1);
     energy = Math.max(0, energy - 1);
     cleanVal = Math.max(0, cleanVal - 1);
-
     checkEvolution();
     updateBars();
 }, 1500);
 
-/*--------------------------
-    日替イベント（ランダム）
----------------------------*/
 setInterval(() => {
     const r = Math.random();
     if (r < 0.2) {
-        message.textContent = "✨ ラッキー！おなか+10";
         hunger = Math.min(100, hunger + 10);
+        message.textContent = "✨ラッキー！おなか+10";
     } else if (r < 0.3) {
-        message.textContent = "🍀 元気+10！";
         energy = Math.min(100, energy + 10);
+        message.textContent = "🍀元気+10";
     }
     updateBars();
 }, 10000);
 
-/*--------------------------
-    ミニゲーム
----------------------------*/
 let score = 0;
 
 function showMiniGame() {
@@ -255,33 +217,27 @@ function showMiniGame() {
     score = 0;
     document.getElementById("score").textContent = "スコア：0";
 }
-
 function hit() {
     score++;
     document.getElementById("score").textContent = "スコア：" + score;
 }
-
 function endGame() {
     document.getElementById("gameArea").style.display = "none";
     energy = Math.min(100, energy + score);
-    message.textContent = "ミニゲームのごほうび！げんき +" + score;
+    message.textContent = "ごほうび！げんき +" + score;
     updateBars();
 }
 
-/*--------------------------
-    セーブ & ロード
----------------------------*/
 function saveGame() {
     localStorage.setItem("gdata", JSON.stringify({
         hunger, energy, cleanVal, stage, evolution
     }));
-    message.textContent = "セーブしました！";
+    message.textContent = "セーブ完了！";
 }
-
 function loadGame() {
     const data = JSON.parse(localStorage.getItem("gdata"));
     if (!data) {
-        message.textContent = "セーブデータがありません";
+        message.textContent = "データなし";
         return;
     }
     hunger = data.hunger;
@@ -293,11 +249,10 @@ function loadGame() {
     stageText.textContent =
         ["たまご", "幼年期", "成長期", "成熟期"][stage];
 
-    message.textContent = "ロードしました！";
+    message.textContent = "ロード完了！";
     updateBars();
 }
 
-/* 初期表示 */
 updateBars();
 </script>
 
